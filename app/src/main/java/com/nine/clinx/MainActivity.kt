@@ -8,25 +8,35 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -37,21 +47,34 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.nine.clinx.app.AppPreviewStartViewModel
+import com.nine.clinx.base.DynamicScreen
+import com.nine.clinx.base.components.AuthorAvatarRound
 import com.nine.clinx.base.model.DynamicViewModel
 import com.nine.clinx.constants.EventBus
+import com.nine.clinx.constants.NavigateRouter
 import com.nine.clinx.flowkit.observeEvent
+import com.nine.clinx.flowkit.postEventValue
 import com.nine.clinx.ui.theme.ClinxTheme
 import com.nine.clinx.ui.theme.LocalAutoWindowInfo
 import com.nine.clinx.ui.widgets.toast.ToastModel
+import com.nine.clinx.ui.widgets.toast.ToastUI
 import com.nine.clinx.ui.widgets.toast.ToastUIState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -62,6 +85,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var viewModel: DynamicViewModel
     private lateinit var appPreviewStartViewModel: AppPreviewStartViewModel
     private var isReady = AtomicBoolean(true)
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -84,107 +108,93 @@ class MainActivity : ComponentActivity() {
             val toastState = remember { ToastUIState() }
             val navigationController = rememberNavController()
             ClinxTheme {
-                NavigationDrawer {
-                    NavContent(selectedIndex = it)
+//                NavigationDrawer {
+//                    NavContent(selectedIndex = it)
+//                }
+                //状态栏高度
+                val statusBarHeightDp = LocalDensity.current.run {
+                    WindowInsets.statusBars.getTop(this).toDp()
                 }
+                appPreviewStartViewModel = hiltViewModel()
+                viewModel = hiltViewModel()
+                val context = LocalContext.current
+                val feedback = LocalHapticFeedback.current
+                val drawerState = rememberDrawerState(DrawerValue.Closed)
+                val scope = rememberCoroutineScope()
 
-//                //状态栏高度
-//                val statusBarHeightDp = LocalDensity.current.run {
-//                    WindowInsets.statusBars.getTop(this).toDp()
-//                }
-//                appPreviewStartViewModel = hiltViewModel()
-//                viewModel = hiltViewModel()
-//                val context = LocalContext.current
-//                val feedback = LocalHapticFeedback.current
-//                val drawerState = rememberDrawerState(DrawerValue.Closed)
-//                val scope = rememberCoroutineScope()
-//                // icons to mimic drawer destinations
-//                val items = listOf(Icons.Default.Favorite, Icons.Default.Face, Icons.Default.Email)
-//                val selectedItem = remember { mutableStateOf(items[0]) }
-//                Box(modifier = Modifier.fillMaxSize()) {
-//                    ModalNavigationDrawer(
-//                        drawerState = drawerState,
-//                        drawerContent = {
-//                            ModalDrawerSheet {
-//                                Spacer(Modifier.height(12.dp))
-//                                items.forEach { item ->
-//                                    NavigationDrawerItem(
-//                                        icon = { Icon(item, contentDescription = null) },
-//                                        label = { Text(item.name) },
-//                                        selected = item == selectedItem.value,
-//                                        onClick = {
-//                                            scope.launch { drawerState.close() }
-//                                            selectedItem.value = item
-//                                        },
-//                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-//                                    )
-//                                }
-//                            }
-//                        }
-//                    ){
-//                        NavHost(navigationController, startDestination = "mainpage") {
-//                            composable("mainpage") {
-//                                Scaffold(
-//                                    topBar = {
-//                                        TopAppBar(
-//                                            windowInsets = WindowInsets(top = statusBarHeightDp),
-//                                            modifier = Modifier.background(
-//                                                Brush.horizontalGradient(
-//                                                    colors = listOf(
-//                                                        Color(23214),
-//                                                        Color.Cyan
-//                                                    ),
-//                                                    tileMode = TileMode.Clamp
-//                                                )
-//                                            ),
-//                                            backgroundColor = Color.Transparent,
-//                                            title = {
-//                                                val avatarUrl = "https://c-ssl.dtstatic.com/uploads/blog/202304/15/20230415081411_9a88c.thumb.400_0.jpg"
-//                                                Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-//                                                    AuthorAvatarRound(
-//                                                        modifier = Modifier
-//                                                            .size(30.dp).aspectRatio(1f),
-//                                                        url = avatarUrl,shape = RoundedCornerShape(50), border = null, contentScale = ContentScale.Crop)
-//                                                    Text("小对象的炼金工坊")
-//                                                }
-//                                            },
-//                                            navigationIcon = {
-//                                                IconButton(
-//                                                    onClick = {
-////                                                            scope.launch {
-////                                                                scaffoldState.drawerState.open()
-////                                                            }
-//                                                    }
-//
-//                                                ) {
-//                                                    Icon(Icons.Filled.ArrowBack, null)
-//                                                }
-//                                            }
-//
-//
-//                                        )
-//
-//                                    },
-//                                    modifier = Modifier.fillMaxSize(),
-//                                ) { innerPadding ->
-//                                    Button(onClick = {
-//                                        context.postEventValue(
-//                                            EventBus.NavController,
-//                                            NavigateRouter.SetPage.TEST_ROUT
-//                                        )
-//                                    }, modifier = Modifier.padding(top = 100.dp)) {
-//                                        Text("跳转")
-//                                    }
-//                                }
-//                            }
-//                            composable("DynamicScreen") {
-//                                DynamicScreen(viewModel)
-//                            }
-//                        }
-//                    }
-//
-//                    ToastUI(toastState)
-//                }
+                Box(modifier = Modifier.fillMaxSize()) {
+                    NavigationDrawer (observeListener = { listener->
+                        observeEvent(key = EventBus.DrawerController) {
+                            scope.launch {
+                                if (listener.isClosed ) {
+                                    listener.open()
+                                } else {
+                                    listener.close()
+                                }
+                            }
+                        }
+                    }){
+                        NavHost(navigationController, startDestination = "mainpage") {
+                            composable("mainpage") {
+                                Scaffold(
+                                    topBar = {
+                                        TopAppBar(
+                                            windowInsets = WindowInsets(top = statusBarHeightDp),
+                                            modifier = Modifier.background(
+                                                Brush.horizontalGradient(
+                                                    colors = listOf(
+                                                        Color(23214),
+                                                        Color.Cyan
+                                                    ),
+                                                    tileMode = TileMode.Clamp
+                                                )
+                                            ),
+                                            title = {
+                                                val avatarUrl = "https://c-ssl.dtstatic.com/uploads/blog/202304/15/20230415081411_9a88c.thumb.400_0.jpg"
+                                                Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                                                    AuthorAvatarRound(
+                                                        modifier = Modifier
+                                                            .size(30.dp).aspectRatio(1f),
+                                                        url = avatarUrl,shape = RoundedCornerShape(50), border = null, contentScale = ContentScale.Crop)
+                                                    Text("小对象的炼金工坊")
+                                                }
+                                            },
+                                            navigationIcon = {
+                                                IconButton(
+                                                    onClick = {
+                                                        context.postEventValue(
+                                                            EventBus.DrawerController,
+                                                            NavigateRouter.SetPage.TEST_ROUT
+                                                        )
+                                                    }
+
+                                                ) {
+                                                    Icon(Icons.Filled.AccountCircle, null)
+                                                }
+                                            }
+                                        )
+
+                                    },
+                                    modifier = Modifier.fillMaxSize(),
+                                ) { innerPadding ->
+                                    Button(onClick = {
+                                        context.postEventValue(
+                                            EventBus.NavController,
+                                            NavigateRouter.SetPage.TEST_ROUT
+                                        )
+                                    }, modifier = Modifier.padding(top = 100.dp)) {
+                                        Text("跳转")
+                                    }
+                                }
+                            }
+                            composable("DynamicScreen") {
+                                DynamicScreen(viewModel)
+                            }
+                        }
+                    }
+
+                    ToastUI(toastState)
+                }
             }
 
             observeEvent(key = EventBus.NavController) {
@@ -205,15 +215,19 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun NavigationDrawer(
-        content: @Composable (Int) -> Unit
-    ) {
+        observeListener:(DrawerState)->Unit,
+        content: @Composable (Int) -> Unit,
+
+        ) {
         val windowWidthSizeClass =
             LocalAutoWindowInfo.current.windowSizeClass.widthSizeClass
 
         val selectedState = rememberSaveable { mutableStateOf(0) }
 
         if (windowWidthSizeClass == WindowWidthSizeClass.Compact) {
-            val drawerState = rememberDrawerState(DrawerValue.Closed)
+            val drawerState = rememberDrawerState(DrawerValue.Closed).apply {
+                observeListener.invoke(this)
+            }
             ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
                 DrawerContent(
                     drawerState = drawerState,
@@ -250,7 +264,7 @@ class MainActivity : ComponentActivity() {
         }
 
         ModalDrawerSheet(
-            drawerShape = if (isCompat) CutCornerShape(topEnd = 16.dp, bottomEnd = 16.dp) else  RectangleShape,
+//            drawerShape = if (isCompat) CutCornerShape(topEnd = 16.dp, bottomEnd = 16.dp,) else  RectangleShape,
             modifier = Modifier.width(sheetWidth)
         ) {
             items.forEachIndexed { index, item ->

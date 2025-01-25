@@ -20,7 +20,7 @@ object EventBus {
 
     const val NavController = "NavController"
     const val ShowToast = "ShowToast"
-
+    const val DrawerController = "DrawerController"
 
     const val CreateBatchImport = "CreateBatchImport"
 

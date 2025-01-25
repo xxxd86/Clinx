@@ -8,6 +8,7 @@ plugins {
     id("kotlin-parcelize")
     id("kotlinx-serialization")
     id("dagger.hilt.android.plugin")
+    id ("com.google.relay") version ("0.3.11")
 }
 
 android {

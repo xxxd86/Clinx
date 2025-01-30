@@ -1,5 +1,6 @@
-package com.nine.clinx.base.model
+package com.nine.clinx.dynamic
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
@@ -11,6 +12,7 @@ import com.nine.clinx.base.data.SimpleSource
 import com.nine.clinx.base.data.UIComponent
 import com.nine.clinx.base.data.UIEvent
 import com.nine.clinx.base.data.UIState
+import com.nine.clinx.base.model.BaseViewModel
 import com.nine.clinx.base.registry.ComponentRegistry
 import com.nine.clinx.base.registry.ComponentRegistryInitializer
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,23 +21,29 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject
 
-@HiltViewModel
-class DynamicViewModel @Inject internal constructor() : ViewModel() {
 
-    private val componentRegistry = ComponentRegistry()
+abstract class DynamicViewModel  internal constructor() : BaseViewModel<ViewIntent, ViewState, SingleEvent>()  {
+    override val viewStateFlow: StateFlow<ViewState> = MutableStateFlow(ViewState.initial()).asStateFlow()
 
-    private val _uiState = MutableStateFlow(UIState(emptyList()))
+    val componentRegistry = ComponentRegistry()
+    open var state = 1
+    val _uiState = MutableStateFlow(UIState(emptyList()))
     val uiState: StateFlow<UIState> get() = _uiState
     private val viewModelJob = SupervisorJob()
     private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
-
     // UI Events (流)
     private val _uiEvent = MutableSharedFlow<UIEvent>(extraBufferCapacity = 1)  // 可以发出事件
     val uiEvent = _uiEvent.asSharedFlow()
@@ -45,16 +53,19 @@ class DynamicViewModel @Inject internal constructor() : ViewModel() {
     }.flow.cachedIn(viewModelScope)
 
     init {
-        //最好能够在UI加载之前将这个组件注册
+        val initialVS = ViewState.initial()
+            //最好能够在UI加载之前将这个组件注册
         uiScope.launch(Dispatchers.Main) {
-            ComponentRegistryInitializer.initializeComponentRegistry(componentRegistry)
+                ComponentRegistryInitializer.initializeComponentRegistry(componentRegistry)
         }
-        // 监听 UI 事件并响应
-        viewModelScope.launch {
-            uiEvent.collect { event ->
-                handleEvent(event)
+            // 监听 UI 事件并响应
+            viewModelScope.launch {
+                uiEvent.collect { event ->
+                    handleEvent(event)
+                }
             }
-        }
+
+
     }
 
     // 加载 JSON 数据并解析
@@ -82,6 +93,21 @@ class DynamicViewModel @Inject internal constructor() : ViewModel() {
             }
         }
     }
+    private fun loadJsonData2():String {
+        return """
+        [
+          {
+    "id": "btn_2",
+    "type": "EditorScreen",
+    "properties": {
+      "text": "Custom Button",
+      "icon": "add_icon",
+      "backgroundColor": "#FF5733"
+    }
+  }
+        ]
+        """
+    }
     private fun loadJsonData1():String {
         return """
         [
@@ -102,7 +128,7 @@ class DynamicViewModel @Inject internal constructor() : ViewModel() {
         [
           {
             "id": "btn_1",
-            "type": "Button",
+            "type": "FlippableCardCarousel",
             "properties": {
               "text": "Click Me",
               "padding": 20
@@ -110,21 +136,12 @@ class DynamicViewModel @Inject internal constructor() : ViewModel() {
           },
           {
             "id": "txt_1",
-            "type": "Text",
+            "type": "Column",
             "properties": {
               "text": "Hello, World!",
               "color": "#FF5733"
             }
-          },
-          {
-    "id": "btn_2",
-    "type": "CustomButton",
-    "properties": {
-      "text": "Custom Button",
-      "icon": "add_icon",
-      "backgroundColor": "#FF5733"
-    }
-  }
+          }
         ]
         """
     }
@@ -138,7 +155,19 @@ class DynamicViewModel @Inject internal constructor() : ViewModel() {
     }
 
     private fun fetchComponentsFromServer(): List<UIComponent> {
-        val components = parseJsonToComponents(loadJsonData1())
+        var jsonData = ""
+        if (state == 1) {
+            jsonData = loadJsonData1()
+        } else {
+            if (state == 2) {
+                jsonData = loadJsonData()
+            }
+            if (state == 3) {
+                jsonData = loadJsonData2()
+            }
+
+        }
+        val components = parseJsonToComponents(jsonData)
         return components
     }
 

@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.nine.clinx.base.data.UIComponent
 import com.nine.clinx.base.data.UIEvent
-import com.nine.clinx.base.model.DynamicViewModel
+import com.nine.clinx.dynamic.DynamicViewModel
 
 //各种Button特殊样式
 @Composable

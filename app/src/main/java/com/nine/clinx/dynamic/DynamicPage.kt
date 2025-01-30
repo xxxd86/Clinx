@@ -1,6 +1,9 @@
-package com.nine.clinx.base
+package com.nine.clinx.dynamic
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -21,39 +24,63 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.nine.clinx.app.AppPreviewStartViewModel
 import com.nine.clinx.base.components.DynamicButton
 import com.nine.clinx.base.components.DynamicStaggerGrid
 import com.nine.clinx.base.components.DynamicText
+import com.nine.clinx.base.components.FlippableCardCarousel
 import com.nine.clinx.base.data.UIComponent
 import com.nine.clinx.base.data.UIEvent
-import com.nine.clinx.base.model.DynamicViewModel
+import com.nine.clinx.ui.page.edit.NotePublishScreen
+import com.nine.clinx.ui.page.home.HomeViewModel
 
 @Composable
-fun DynamicScreen(viewModel: DynamicViewModel) {
+fun DynamicScreen(
+    viewModel: DynamicViewModel,
+    innerPadding: PaddingValues,
+    appPreviewStartViewModel: AppPreviewStartViewModel
+) {
     // 观察 ViewModel 中的 UIState
     val uiState by viewModel.uiState.collectAsState()
-
-    // 在组件首次加载时异步加载组件数据
     LaunchedEffect(Unit) {
         viewModel.loadComponents()
     }
-
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
         uiState.components.forEach { component ->
-            when (component.type) {
-                "Button" -> DynamicButton(viewModel, component)
-                "Text" -> DynamicText(viewModel, component)
-                "CustomButton" -> DynamicCustomButton(viewModel, component)  // 渲染自定义按钮
-                "Spacer" -> Spacer(modifier = Modifier
-                    .height(0.dp)
-                    .width(0.dp))
-                "StaggerGrid"->DynamicStaggerGrid(viewModel,viewModel.projects.collectAsLazyPagingItems())
-                else -> Spacer(modifier = Modifier.height(16.dp))
-            }
+            DynamicItem(component,viewModel)
         }
     }
 }
-
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+@Composable
+ fun DynamicItem(component:UIComponent,viewModel: DynamicViewModel) {
+    when (component.type) {
+        "Button" -> DynamicButton(viewModel, component)
+        "Text" -> DynamicText(viewModel, component)
+        "CustomButton" -> DynamicCustomButton(viewModel, component)  // 渲染自定义按钮
+        "Spacer" -> Spacer(modifier = Modifier
+            .height(0.dp)
+            .width(0.dp))
+        "StaggerGrid"->DynamicStaggerGrid(viewModel,viewModel.projects.collectAsLazyPagingItems())
+        "CommitCard"-> Spacer(modifier = Modifier
+            .height(0.dp)
+            .width(0.dp))
+        "FlippableCardCarousel"->FlippableCardCarousel(Modifier)
+        "EditorScreen" ->{
+            NotePublishScreen()
+        }
+        "Column"-> LazyColumn{
+            repeat(50) {
+                item {
+                    Button(onClick = {},) {
+                        Text("你好")
+                    }
+                }
+            }
+        }
+        else -> Spacer(modifier = Modifier.height(16.dp))
+    }
+}
 
 @Composable
 fun DynamicCustomButton(viewModel: DynamicViewModel, component: UIComponent) {

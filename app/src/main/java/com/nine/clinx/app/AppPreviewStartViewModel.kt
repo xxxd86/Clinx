@@ -22,6 +22,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AppPreviewStartViewModel @Inject internal constructor() : ViewModel() {
+    var currentRoute = "MainPage"
     //注册基础Module
     @Composable
     fun ObserveAppBaseEvents(activity:ComponentActivity) {

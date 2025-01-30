@@ -21,6 +21,9 @@ object EventBus {
     const val NavController = "NavController"
     const val ShowToast = "ShowToast"
     const val DrawerController = "DrawerController"
+    const val TopBarContent = "TopBarContent"
+    //主页路由
+    const val Home_Jump_To_Detail = "Home_Jump_To_Detail"
 
     const val CreateBatchImport = "CreateBatchImport"
 

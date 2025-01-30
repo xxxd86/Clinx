@@ -7,7 +7,7 @@ object ComponentRegistryInitializer {
     private var isInitialized = false
 
     fun initializeComponentRegistry(componentRegistry: ComponentRegistry) {
-        if (isInitialized) return  // 防止重复注册
+//        if (isInitialized) return  // 防止重复注册
 
         componentRegistry.registerComponent("Spacer") { id, properties ->
             OriginComponentState(id, "Spacer", properties)
@@ -28,8 +28,20 @@ object ComponentRegistryInitializer {
         componentRegistry.registerComponent("StaggerGrid") {id, properties ->
             OriginComponentState(id, "StaggerGrid", properties)
         }
+        componentRegistry.registerComponent("FlippableCardCarousel"){id, properties ->
+            OriginComponentState(id, "FlippableCardCarousel", properties)
+        }
+        componentRegistry.registerComponent("Column"){id, properties ->
+            OriginComponentState(id, "Column", properties)
+        }
+        componentRegistry.registerComponent("Row"){id, properties ->
+            OriginComponentState(id, "Row", properties)
+        }
+        componentRegistry.registerComponent("EditorScreen"){id, properties ->
+            OriginComponentState(id, "EditorScreen", properties)
+        }
 
-        isInitialized = true  // 标记为已初始化
+//        isInitialized = true  // 标记为已初始化
     }
 }
 

@@ -3,12 +3,6 @@ package com.nine.clinx.app
 import com.nine.clinx.constants.Constants
 import com.nine.clinx.store.DataStoreUtils
 
-
-/**
- * @Description:
- * @Author: JIULANG
- * @Data: 2022/12/28 18:10
- */
 object AppSystemSetManage {
     private const val InitialLoad = "initial_load"
     private const val ConsentAgreement_Key = "consent_agreement_key"

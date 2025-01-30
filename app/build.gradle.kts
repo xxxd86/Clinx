@@ -70,7 +70,9 @@ dependencies {
     //hilt
     implementation (libs.hilt.android)
     kapt(libs.hilt.compiler)
+
     implementation(libs.androidx.hilt.navigation.compose)
+
     //retrofit
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
@@ -92,4 +94,8 @@ dependencies {
     implementation ("androidx.paging:paging-runtime:3.2.1")
     implementation ("androidx.paging:paging-compose:3.2.1")
     implementation ("com.google.accompanist:accompanist-swiperefresh:0.21.2-beta")
+    implementation ("com.google.accompanist:accompanist-navigation-animation:0.21.1-beta")
+    //image
+    implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+
 }

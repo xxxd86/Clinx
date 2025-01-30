@@ -1,5 +1,6 @@
 package com.nine.clinx.ui.theme
 
+import android.annotation.SuppressLint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
 
@@ -39,6 +40,7 @@ val immerseBackgroundColorLight = Color(0xFFF2F3F8)
 val immerseBackgroundColorDark = Color(0xFF0e0e14)
 
 val itemBackgroundLight = Color(0xFFFFFFFF)
+@SuppressLint("InvalidColorHexValue")
 val itemBackgroundDark = Color(0xFFF33333D)
 
 val textPrimaryLight = Color(0xFF333333)

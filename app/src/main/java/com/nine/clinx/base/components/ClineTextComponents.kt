@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.nine.clinx.base.data.UIComponent
 import com.nine.clinx.base.data.UIEvent
-import com.nine.clinx.base.model.DynamicViewModel
+import com.nine.clinx.dynamic.DynamicViewModel
 
 //引入Savable能力
 @Composable
